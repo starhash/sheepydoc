@@ -1,0 +1,168 @@
+<html style="overflow: hidden;">
+    <head>
+        <link rel="stylesheet" href="styles/angular-material.css">
+        <link rel="stylesheet" href="index.css">
+        <link rel="stylesheet" href="scripts/highlight/styles/default.css">
+        <title>{$name} - Documentation</title>
+        <link rel="icon" type="image/png" href="images/icon.png">
+    </head>
+    <body ng-app="{$module}" ng-init="doInit()">
+        <script src="scripts/angular.js"></script>
+        <script src="scripts/angular-animate.js"></script>
+        <script src="scripts/angular-aria.js"></script>
+        <script src="scripts/angular-messages.js"></script>
+        <script src="scripts/angular-material.js"></script>
+        <script src="scripts/angular-bind-html-compile.js"></script>
+        <script src="scripts/jquery.js"></script>
+        <script src="scripts/highlight/highlight.pack.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <script>
+            var app = angular.module('{$module}', ["angular-bind-html-compile", 'ngMaterial']);
+        </script>
+        <script src="index.js"></script>
+        <div ng-controller="{$module}Controller">
+            <div style="height: 128px;" md-colors="{background: 'default-primary-A100-1.0'}">
+                <table>
+                    <tr>
+                        <td>
+                            <div style="padding-top: 36px; padding-left: 32px; padding-right: 16px; display: inline-block;">
+                                <img src="images/logo.png" height="48" />
+                            </div>
+                        </td>
+                        <td flex>
+                            <div style="font-size: 32px; color: white; display: inline-flex; padding-top: 36px;">{$name}</div>
+                            <div style="font-size: 10px; color: white; display: flex; padding-top: 2px;">{$sub}</div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            <div layout="row">
+                <div flex="20" style="background-color: #eeeeee; height: calc(100% - 128px); text-align: right;" layout="column">
+                    <md-list style="padding: 0px;">
+                        <md-list-item ng-click="popStack()" style="text-align: right;" md-colors="{background:'default-primary-A100-1.0', color:'white-accent-A100-1.0'}">
+                            <span flex></span><img src="images/left.png" /> Back
+                        </md-list-item>
+                    </md-list>
+                    <div style="overflow-y: auto;">
+                        <md-list ng-repeat="(modulename, module) in selectedContent.modules" style="padding: 0px;">
+                            <md-list-item ng-click="setContent(modulename, module)" style="font-weight: bold; min-height: 20px; height: 36px;"
+                                md-colors="{background:'default-primary-800-1.0', color:'white-accent-A100-1.0'}">
+                                <!-- <span flex></span> --><span style="padding-right: 16px"><img src="images/module.png" /></span>{{modulename}}
+                            </md-list-item>
+                            <md-list-item ng-repeat="(submodulename, submodule) in module.modules"
+                                style="min-height: 20px; height: 36px;"
+                                ng-click="setContent(submodulename, submodule)" class="padded-md-list-item"
+                                md-colors="{background:'default-primary-600-1.0', color:'white-accent-A100-1.0'}">
+                                <!--<span flex></span>--><span style="padding-right: 16px"><img src="images/code-white.png" /></span>{{submodulename}}
+                            </md-list-item>
+                        </md-list>
+                    </div>
+                </div>
+                <div flex="80" style="padding-top: 20px; padding-left: 20px; padding-bottom: 20px; padding-right: 0px; height: calc(100% - 128px); padding-bottom: 0px;" layout="column">
+                    <div style="margin-top: -20px; margin-bottom: -20px; margin-left: -20px; margin-right: 0px; padding: 18px; box-shadow: 5px 5px 5px #eeeeee; height: 12px; z-index: 1;">
+                        <img src="images/home.png" style="margin: -3px;" />
+                        <div style="display: inline-block; margin-left: 16px; position: absolute;">
+                            <span ng-repeat="stage in contentStack" style="font-size: 10px;" ng-if="$index > 0" ng-show="!stackEmpty()">
+                                /{{stage.key}}
+                            </span>
+                            <span ng-show="stackEmpty()" style="font-size: 10px;">Index</span>
+                        </div>
+                    </div>
+                    <div style="margin-top: 20px; overflow: auto; margin-right: -1px; padding-right: 32px;">
+                        <div>
+                            <h2>Modules</h2>
+                            <div ng-show="noModules()">
+                                No packages
+                            </div>
+                            <div ng-repeat="(modulename, module) in selectedContent.modules">
+                                <div style="display: inline-flex; width: 100%;" ng-class="{ 'shadowbelow' : module.$showCode }">
+                                    <div style="padding-right: 8px; margin-top: 12px; margin-left: 8px;"><img src="images/package.png" /></div>
+                                    <h2 md-color="{ color : 'default-accent-A100-1.0' }" class="sheepy-link"
+                                        style="margin-top: 12px; margin-left: 7px;" ng-click="setContent(modulename, module);">
+                                        {{modulename}}
+                                    </h1>
+                                    <md-checkbox ng-model="module.$showCode" color="accent" aria-label="Show Code" style="margin-top: 14px; padding-top: 3px; transform: scale(0.8);">
+                                        Show Code
+                                    </md-checkbox>
+                                </div>
+                                <div style="margin-left: 48px;">
+                                    <div ng-show="!module.$showCode">
+                                        <div bind-html-compile="module.description"></div>
+                                    </div>
+                                    <div ng-show="module.$showCode">
+                                        <img src="images/code.png" style="margin-top: 24px; margin-left: -37px;" />
+                                        <pre style="margin-top: -32px;">
+                                            <code class="python" style="text-overflow: ellipsis;" ng-bind="module.code"></code>
+                                        </pre>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <h2>Classes</h2>
+                            <div ng-show="noClasses()">
+                                No classes
+                            </div>
+                            <div ng-repeat="(classname, class) in selectedContent.classes">
+                                <div style="display: inline-flex; width: 100%;" ng-class="{ 'shadowbelow' : class.$showCode }">
+                                    <div style="padding-right: 8px; margin-top: 12px; margin-left: 8px;"><img src="images/class.png" /></div>
+                                    <h2 style="margin-top: 12px; margin-left: 7px;">{{classname}}</h1>
+                                    <md-checkbox ng-model="class.$showCode" color="accent" aria-label="Show Code" style="margin-top: 14px; padding-top: 3px; transform: scale(0.8);">
+                                        Show Code
+                                    </md-checkbox>
+                                </div>
+                                <div style="margin-left: 48px;">
+                                    <div ng-show="!class.$showCode">
+                                        <div bind-html-compile="class.description"></div>
+                                    </div>
+                                    <div ng-show="class.$showCode">
+                                        <img src="images/code.png" style="margin-top: 24px; margin-left: -37px;" />
+                                        <pre style="margin-top: -32px;">
+                                            <code class="python" ng-bind="class.code"></code>
+                                        </pre>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <h2>Methods</h2>
+                            <div ng-show="noMethods()">
+                                No methods
+                            </div>
+                            <div ng-repeat="(methodname, method) in selectedContent.methods">
+                                <div style="display: inline-flex; width: 100%;" ng-class="{ 'shadowbelow' : method.$showCode }">
+                                    <div style="padding-right: 8px; margin-top: 12px; margin-left: 8px;"><img src="images/method.png" /></div>
+                                    <h2 style="margin-top: 12px; margin-left: 7px;">{{methodname}}</h1>
+                                    <md-checkbox ng-model="method.$showCode" color="accent" aria-label="Show Code" style="margin-top: 14px; padding-top: 3px; transform: scale(0.8);">
+                                        Show Code
+                                    </md-checkbox>
+                                </div>
+                                <div style="margin-left: 48px; margin-bottom: 16px;">
+                                    <div ng-show="!method.$showCode">
+                                        <div bind-html-compile="method.description"></div>
+                                        <div ng-show="!noParams(method.params)" style="padding: 16px; background-color: #eeeeee; margin-top: 12px;">
+                                            <h4 style="margin-top: 0px;">Parameters</h4>
+                                            <div layout="column">
+                                                <div ng-repeat="(param, paramobject) in method.params" layout="row">
+                                                    <div flex="15" style="text-overflow: ellipsis;"><i>{{param}}</i></div>
+                                                    <div flex="20" style="text-overflow: ellipsis;"><b>{{paramobject.type}}</b></div>
+                                                    <div flex-"65" bind-html-compile="paramobject.description" style="text-overflow: ellipsis;"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div ng-show="method.$showCode">
+                                        <img src="images/code.png" style="margin-top: 24px; margin-left: -37px;" />
+                                        <pre style="margin-top: -32px;">
+                                            <code class="python" ng-bind="method.code"></code>
+                                        </pre>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

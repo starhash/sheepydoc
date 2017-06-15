@@ -1,0 +1,157 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>1d832282-f3f9-4a53-9acd-1278c3a16d7f</ProjectGuid>
+    <ProjectHome>.</ProjectHome>
+    <StartupFile>main.py</StartupFile>
+    <SearchPath>
+    </SearchPath>
+    <WorkingDirectory>.</WorkingDirectory>
+    <OutputPath>.</OutputPath>
+    <Name>sheepydoc</Name>
+    <RootNamespace>sheepydoc</RootNamespace>
+    <IsWindowsApplication>False</IsWindowsApplication>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <DebugSymbols>true</DebugSymbols>
+    <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <DebugSymbols>true</DebugSymbols>
+    <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="main.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="sheepydoc.py" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="template\" />
+    <Folder Include="template\images\" />
+    <Folder Include="template\scripts\" />
+    <Folder Include="template\scripts\highlight\" />
+    <Folder Include="template\scripts\highlight\styles\" />
+    <Folder Include="template\styles\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="template\images\class.png" />
+    <Content Include="template\images\code-white.png" />
+    <Content Include="template\images\code.png" />
+    <Content Include="template\images\home.png" />
+    <Content Include="template\images\left.png" />
+    <Content Include="template\images\logo.png" />
+    <Content Include="template\images\method.png" />
+    <Content Include="template\images\module.png" />
+    <Content Include="template\images\package.png" />
+    <Content Include="template\index.css" />
+    <Content Include="template\index.html" />
+    <Content Include="template\index.js" />
+    <Content Include="template\scripts\angular-animate.js" />
+    <Content Include="template\scripts\angular-aria.js" />
+    <Content Include="template\scripts\angular-bind-html-compile.js" />
+    <Content Include="template\scripts\angular-material.js" />
+    <Content Include="template\scripts\angular-messages.js" />
+    <Content Include="template\scripts\angular.js" />
+    <Content Include="template\scripts\highlight\highlight.pack.js" />
+    <Content Include="template\scripts\highlight\styles\agate.css" />
+    <Content Include="template\scripts\highlight\styles\androidstudio.css" />
+    <Content Include="template\scripts\highlight\styles\arduino-light.css" />
+    <Content Include="template\scripts\highlight\styles\arta.css" />
+    <Content Include="template\scripts\highlight\styles\ascetic.css" />
+    <Content Include="template\scripts\highlight\styles\atelier-cave-dark.css" />
+    <Content Include="template\scripts\highlight\styles\atelier-cave-light.css" />
+    <Content Include="template\scripts\highlight\styles\atelier-dune-dark.css" />
+    <Content Include="template\scripts\highlight\styles\atelier-dune-light.css" />
+    <Content Include="template\scripts\highlight\styles\atelier-estuary-dark.css" />
+    <Content Include="template\scripts\highlight\styles\atelier-estuary-light.css" />
+    <Content Include="template\scripts\highlight\styles\atelier-forest-dark.css" />
+    <Content Include="template\scripts\highlight\styles\atelier-forest-light.css" />
+    <Content Include="template\scripts\highlight\styles\atelier-heath-dark.css" />
+    <Content Include="template\scripts\highlight\styles\atelier-heath-light.css" />
+    <Content Include="template\scripts\highlight\styles\atelier-lakeside-dark.css" />
+    <Content Include="template\scripts\highlight\styles\atelier-lakeside-light.css" />
+    <Content Include="template\scripts\highlight\styles\atelier-plateau-dark.css" />
+    <Content Include="template\scripts\highlight\styles\atelier-plateau-light.css" />
+    <Content Include="template\scripts\highlight\styles\atelier-savanna-dark.css" />
+    <Content Include="template\scripts\highlight\styles\atelier-savanna-light.css" />
+    <Content Include="template\scripts\highlight\styles\atelier-seaside-dark.css" />
+    <Content Include="template\scripts\highlight\styles\atelier-seaside-light.css" />
+    <Content Include="template\scripts\highlight\styles\atelier-sulphurpool-dark.css" />
+    <Content Include="template\scripts\highlight\styles\atelier-sulphurpool-light.css" />
+    <Content Include="template\scripts\highlight\styles\atom-one-dark.css" />
+    <Content Include="template\scripts\highlight\styles\atom-one-light.css" />
+    <Content Include="template\scripts\highlight\styles\brown-paper.css" />
+    <Content Include="template\scripts\highlight\styles\brown-papersq.png" />
+    <Content Include="template\scripts\highlight\styles\codepen-embed.css" />
+    <Content Include="template\scripts\highlight\styles\color-brewer.css" />
+    <Content Include="template\scripts\highlight\styles\darcula.css" />
+    <Content Include="template\scripts\highlight\styles\dark.css" />
+    <Content Include="template\scripts\highlight\styles\darkula.css" />
+    <Content Include="template\scripts\highlight\styles\default.css" />
+    <Content Include="template\scripts\highlight\styles\docco.css" />
+    <Content Include="template\scripts\highlight\styles\dracula.css" />
+    <Content Include="template\scripts\highlight\styles\far.css" />
+    <Content Include="template\scripts\highlight\styles\foundation.css" />
+    <Content Include="template\scripts\highlight\styles\github-gist.css" />
+    <Content Include="template\scripts\highlight\styles\github.css" />
+    <Content Include="template\scripts\highlight\styles\googlecode.css" />
+    <Content Include="template\scripts\highlight\styles\grayscale.css" />
+    <Content Include="template\scripts\highlight\styles\gruvbox-dark.css" />
+    <Content Include="template\scripts\highlight\styles\gruvbox-light.css" />
+    <Content Include="template\scripts\highlight\styles\hopscotch.css" />
+    <Content Include="template\scripts\highlight\styles\hybrid.css" />
+    <Content Include="template\scripts\highlight\styles\idea.css" />
+    <Content Include="template\scripts\highlight\styles\ir-black.css" />
+    <Content Include="template\scripts\highlight\styles\kimbie.dark.css" />
+    <Content Include="template\scripts\highlight\styles\kimbie.light.css" />
+    <Content Include="template\scripts\highlight\styles\magula.css" />
+    <Content Include="template\scripts\highlight\styles\mono-blue.css" />
+    <Content Include="template\scripts\highlight\styles\monokai-sublime.css" />
+    <Content Include="template\scripts\highlight\styles\monokai.css" />
+    <Content Include="template\scripts\highlight\styles\obsidian.css" />
+    <Content Include="template\scripts\highlight\styles\ocean.css" />
+    <Content Include="template\scripts\highlight\styles\paraiso-dark.css" />
+    <Content Include="template\scripts\highlight\styles\paraiso-light.css" />
+    <Content Include="template\scripts\highlight\styles\pojoaque.css" />
+    <Content Include="template\scripts\highlight\styles\pojoaque.jpg" />
+    <Content Include="template\scripts\highlight\styles\purebasic.css" />
+    <Content Include="template\scripts\highlight\styles\qtcreator_dark.css" />
+    <Content Include="template\scripts\highlight\styles\qtcreator_light.css" />
+    <Content Include="template\scripts\highlight\styles\railscasts.css" />
+    <Content Include="template\scripts\highlight\styles\rainbow.css" />
+    <Content Include="template\scripts\highlight\styles\routeros.css" />
+    <Content Include="template\scripts\highlight\styles\school-book.css" />
+    <Content Include="template\scripts\highlight\styles\school-book.png" />
+    <Content Include="template\scripts\highlight\styles\solarized-dark.css" />
+    <Content Include="template\scripts\highlight\styles\solarized-light.css" />
+    <Content Include="template\scripts\highlight\styles\sunburst.css" />
+    <Content Include="template\scripts\highlight\styles\tomorrow-night-blue.css" />
+    <Content Include="template\scripts\highlight\styles\tomorrow-night-bright.css" />
+    <Content Include="template\scripts\highlight\styles\tomorrow-night-eighties.css" />
+    <Content Include="template\scripts\highlight\styles\tomorrow-night.css" />
+    <Content Include="template\scripts\highlight\styles\tomorrow.css" />
+    <Content Include="template\scripts\highlight\styles\vs.css" />
+    <Content Include="template\scripts\highlight\styles\vs2015.css" />
+    <Content Include="template\scripts\highlight\styles\xcode.css" />
+    <Content Include="template\scripts\highlight\styles\xt256.css" />
+    <Content Include="template\scripts\highlight\styles\zenburn.css" />
+    <Content Include="template\scripts\jquery.js" />
+    <Content Include="template\styles\angular-material.css" />
+  </ItemGroup>
+  <ItemGroup />
+  <PropertyGroup>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
+  </PropertyGroup>
+  <!-- Uncomment the CoreCompile target to enable the Build command in
+       Visual Studio and specify your pre- and post-build commands in
+       the BeforeBuild and AfterBuild targets below. -->
+  <!--<Target Name="CoreCompile" />-->
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
+</Project>
