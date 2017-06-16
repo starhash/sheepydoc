@@ -76,19 +76,21 @@ app.controller('{$module}Controller', ['$scope', function($scope) {
     $scope.content = {$content};
 
     $scope.$contentIndex = {};
-    $scope.$indexer = function($name, $content, $type) {
+    $scope.$currentContentIndex = {};
+
+    $scope.$indexer = function($name, $content, $type, $indexingStore) {
         $content.$type = $type;
         $content.$name = $name;
-        $scope.$contentIndex[$content.$name] = $content;
+        $scope.$indexingStore[$content.$name] = $content;
         if ($type === "module") {
             for (var $module in $content.modules) {
-                $scope.$indexer($name + '.' + $module, $content.modules[$module], $type);
+                $scope.$indexer($name + '.' + $module, $content.modules[$module], $type, $indexingStore);
             }
             for (var $class in $content.classes) {
-                $scope.$indexer($name + '.' + $class, $content.classes[$class], "class");
+                $scope.$indexer($name + '.' + $class, $content.classes[$class], "class", $indexingStore);
             }
             for (var $method in $content.methods) {
-                $scope.$indexer($name + '.' + $method, $content.methods[$method], "method");
+                $scope.$indexer($name + '.' + $method, $content.methods[$method], "method", $indexingStore);
             }
         } else if ($type === "class") {
             
@@ -115,7 +117,7 @@ app.controller('{$module}Controller', ['$scope', function($scope) {
         }
     };
     $scope.indexAvailableContent = function () {
-        $scope.$indexer("$root$", $scope.content, "module");
+        $scope.$indexer("$root$", $scope.content, "module", $scope.$contentIndex);
         setTimeout(function () {
             $scope.$linker();
         }, 500);
@@ -123,8 +125,9 @@ app.controller('{$module}Controller', ['$scope', function($scope) {
 
     $scope.indexAvailableContent();
     
-    $scope.setContent = function($key, $content) {
+    $scope.setContent = function($key, $content, $type) {
         $scope.selectedContent = $content;
+        $scope.$indexer($key, $content, $type, $scope.$currentContentIndex);
         setTimeout(function () {
             var codes = $('code');
             codes.each(function(i, block) {
@@ -138,8 +141,8 @@ app.controller('{$module}Controller', ['$scope', function($scope) {
     $scope.peekStack = function() {
         return $scope.contentStack[$scope.contentStack.length - 1];
     };
-    $scope.pushStack = function($key, $content) {
-        $scope.contentStack.push({ key: $key, content: $content });
+    $scope.pushStack = function($key, $content, $type) {
+        $scope.contentStack.push({ key: $key, content: $content, type: $type });
     };
     $scope.popStack = function() {
         if ($scope.contentStack.length === 1) {
@@ -148,11 +151,11 @@ app.controller('{$module}Controller', ['$scope', function($scope) {
         var popped = $scope.contentStack.pop();
         var peek = $scope.contentStack.pop();
         if (peek !== undefined) {
-            $scope.setContent(peek.key, peek.content);
+            $scope.setContent(peek.key, peek.content, peek.type);
         }
     };
     
-    $scope.setContent("{$module}_root", $scope.content);
+    $scope.setContent("{$module}_root", $scope.content, "module");
 
     $scope.noModules = function () {
         if ($scope.selectedContent === undefined || $scope.selectedContent.modules === undefined) {

@@ -45,7 +45,7 @@
                     </md-list>
                     <div style="overflow-y: auto;">
                         <md-list ng-repeat="(modulename, module) in selectedContent.modules" style="padding: 0px;">
-                            <md-list-item ng-click="setContent(modulename, module)" style="font-weight: bold; min-height: 20px; height: 36px;"
+                            <md-list-item ng-click="setContent(modulename, module, 'module')" style="font-weight: bold; min-height: 20px; height: 36px;"
                                 md-colors="{background:'default-primary-800-1.0', color:'white-accent-A100-1.0'}">
                                 <!-- <span flex></span> --><span style="padding-right: 16px"><img src="images/module.png" /></span>{{modulename}}
                             </md-list-item>
