@@ -31,6 +31,7 @@
     <Compile Include="sheepydoc.py" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="assets\" />
     <Folder Include="template\" />
     <Folder Include="template\images\" />
     <Folder Include="template\scripts\" />
@@ -39,6 +40,7 @@
     <Folder Include="template\styles\" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="assets\sheepydoc.logo.png" />
     <Content Include="template\images\class.png" />
     <Content Include="template\images\code-white.png" />
     <Content Include="template\images\code.png" />

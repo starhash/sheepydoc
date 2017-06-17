@@ -1,9 +1,9 @@
 var app = angular.module('{$module}', ["angular-bind-html-compile", 'ngMaterial']);
 
-app.config(function($mdThemingProvider) {
+app.config(function ($mdThemingProvider) {
     $mdThemingProvider.definePalette('sheepyBlue', {
         '50': 'e6f3ff',
-        '100': 'b3daff',
+        '100': 'acd7fe',
         '200': '99ceff',
         '300': '66b5ff',
         '400': '4da9ff',
@@ -17,7 +17,7 @@ app.config(function($mdThemingProvider) {
         'A400': '004280',
         'A700': '003566',
         'contrastDefaultColor': 'light',    // whether, by default, text (contrast)
-                                            // on this palette should be dark or light
+        // on this palette should be dark or light
 
         'contrastDarkColors': ['50', '100', //hues which contrast should be 'dark' by default
             '200', '300', '400', 'A100'],
@@ -39,7 +39,7 @@ app.config(function($mdThemingProvider) {
         'A400': '990042',
         'A700': '800037',
         'contrastDefaultColor': 'light',    // whether, by default, text (contrast)
-                                            // on this palette should be dark or light
+        // on this palette should be dark or light
 
         'contrastDarkColors': ['50', '100', //hues which contrast should be 'dark' by default
             '200', '300', '400', 'A100'],
@@ -61,7 +61,7 @@ app.config(function($mdThemingProvider) {
         'A400': 'ffffff',
         'A700': 'ffffff',
         'contrastDefaultColor': 'light',    // whether, by default, text (contrast)
-                                            // on this palette should be dark or light
+        // on this palette should be dark or light
 
         'contrastDarkColors': ['A100'],
         'contrastLightColors': undefined    // could also specify this if default was 'dark'
@@ -77,25 +77,39 @@ app.controller('{$module}Controller', ['$scope', function($scope) {
 
     $scope.$contentIndex = {};
     $scope.$currentContentIndex = {};
+    $scope.$glossary = {$glossary};
+    $scope.search = { show: false, input: "" };
+    $scope.searchResults = [];
 
-    $scope.$indexer = function($name, $content, $type, $indexingStore) {
+    $scope.$indexer = function ($name, $content, $type, $indexingStore) {
         $content.$type = $type;
         $content.$name = $name;
-        $scope.$indexingStore[$content.$name] = $content;
+        $indexingStore[$content.$name] = $content;
         if ($type === "module") {
-            for (var $module in $content.modules) {
-                $scope.$indexer($name + '.' + $module, $content.modules[$module], $type, $indexingStore);
+            if ($content.modules !== undefined) {
+                for (var $module in $content.modules) {
+                    $scope.$indexer($name + '.' + $module.substring($module.lastIndexOf('.') + 1), $content.modules[$module], $type, $indexingStore);
+                }
             }
             for (var $class in $content.classes) {
-                $scope.$indexer($name + '.' + $class, $content.classes[$class], "class", $indexingStore);
+                $scope.$indexer($name + '.' + $class.substring($class.lastIndexOf('.') + 1), $content.classes[$class], "class", $indexingStore);
             }
             for (var $method in $content.methods) {
-                $scope.$indexer($name + '.' + $method, $content.methods[$method], "method", $indexingStore);
+                $scope.$indexer($name + '.' + $method.substring($method.lastIndexOf('.') + 1), $content.methods[$method], "method", $indexingStore);
             }
         } else if ($type === "class") {
-            
+            for (var $class in $content.classes) {
+                $scope.$indexer($name + '.' + $class.substring($class.lastIndexOf('.') + 1), $content.classes[$class], "class", $indexingStore);
+            }
+            for (var $method in $content.methods) {
+                $scope.$indexer($name + '.' + $method.substring($method.lastIndexOf('.') + 1), $content.methods[$method], "method", $indexingStore);
+            }
         } else if ($type === "method") {
-
+            $content.returns.forEach(function ($returns) {
+                if (/search\//.test($returns.type)) {
+                    $returns.type = $returns.type.replace("search/", "<a class='sheepy-link-code' target='_blank' href='https://www.google.co.in/search?q=python:doc:" + $returns.type.replace('search/', "") + "'>") + "</a>";
+                }
+            });
         }
     }
     $scope.$linkresolver = function ($code) {
@@ -124,13 +138,13 @@ app.controller('{$module}Controller', ['$scope', function($scope) {
     }
 
     $scope.indexAvailableContent();
-    
-    $scope.setContent = function($key, $content, $type) {
+
+    $scope.setContent = function ($key, $content, $type) {
         $scope.selectedContent = $content;
         $scope.$indexer($key, $content, $type, $scope.$currentContentIndex);
         setTimeout(function () {
             var codes = $('code');
-            codes.each(function(i, block) {
+            codes.each(function (i, block) {
                 hljs.highlightBlock(block);
             });
         }, 10);
@@ -138,13 +152,13 @@ app.controller('{$module}Controller', ['$scope', function($scope) {
     }
 
     $scope.contentStack = [];
-    $scope.peekStack = function() {
+    $scope.peekStack = function () {
         return $scope.contentStack[$scope.contentStack.length - 1];
     };
-    $scope.pushStack = function($key, $content, $type) {
+    $scope.pushStack = function ($key, $content, $type) {
         $scope.contentStack.push({ key: $key, content: $content, type: $type });
     };
-    $scope.popStack = function() {
+    $scope.popStack = function () {
         if ($scope.contentStack.length === 1) {
             return;
         }
@@ -154,8 +168,8 @@ app.controller('{$module}Controller', ['$scope', function($scope) {
             $scope.setContent(peek.key, peek.content, peek.type);
         }
     };
-    
-    $scope.setContent("{$module}_root", $scope.content, "module");
+
+    $scope.setContent("$root$", $scope.content, "module");
 
     $scope.noModules = function () {
         if ($scope.selectedContent === undefined || $scope.selectedContent.modules === undefined) {
@@ -178,7 +192,55 @@ app.controller('{$module}Controller', ['$scope', function($scope) {
     $scope.noParams = function ($params) {
         return Object.keys($params).length == 0;
     };
+    $scope.noReturns = function ($returns) {
+        return Object.keys($returns).length == 0;
+    };
     $scope.stackEmpty = function () {
         return $scope.contentStack.length <= 1;
+    };
+
+    $scope.closeSidebar = function () {
+        $scope.sidebarOpen = false;
+    };
+    $scope.openSidebar = function ($type) {
+        $scope.sidebarType = $type;
+        $scope.sidebarOpen = true;
+    }
+
+    $scope.openGlossary = function ($glossaryTerm) {
+        $scope.openSidebar("glossary");
+        $scope.selectedGlossaryTerm = $glossaryTerm;
+        $scope.selectedGlossaryContent = $scope.$glossary[$glossaryTerm];
+    };
+
+    $scope.setIndex = function ($index) {
+        $scope.popStack();
+        var $indexedContent = $scope.$contentIndex["$root$." + $index];
+        $scope.setContent($index, $indexedContent);
+        if (!$scope.$digest) {
+            $scope.$apply();
+        }
+    };
+
+    $scope.toggleSearch = function () {
+        $scope.search.show = !$scope.search.show;
+        if ($scope.search.show) {
+            $scope.openSidebar("search");
+            $scope.searchIndex();
+        } else {
+            $scope.closeSidebar();
+        }
+    };
+
+    $scope.searchIndex = function () {
+        $scope.searchResults = [];
+        for(var key in $scope.$contentIndex) {
+            if (key.indexOf($scope.search.input) !== -1 && key !== "$root$") {
+                $scope.searchResults.push(key.replace("$root$.", ""));
+            }
+        }
+    };
+    $scope.noResults = function () {
+        return $scope.searchResults.length === 0;
     };
 }]);

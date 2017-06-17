@@ -19,7 +19,12 @@ import re
 import os
 import shutil
 import importlib
+import pprint
 from json import dumps
+from io import StringIO
+
+def _tab_(_count_ = 0):
+    return "  " * _count_
 
 def _deleteall_(top):
     """
@@ -42,7 +47,7 @@ def _deleteall_(top):
 
 def _splitinclude_(docstring, splitters = []):
     """
-    Helper function which removes the '@' tags used by sheepydoc from the docstring.
+    Helper function which removes the '@' tags used by sheepydoc from the $glossary{docstring}.
 
     @param string : str {
         The docstring which needs to be cleaned.
@@ -75,7 +80,7 @@ def _getsourcecode_(source):
                 src = "".join(myfile.readlines())
         except:
             return src
-    return src
+    return src.replace("`", "'")
 
 def _getsubmodules_(module):
     """
@@ -92,10 +97,16 @@ def _getsubmodules_(module):
             if os.path.isdir(location + '\\' + item):
                 if os.path.exists(location + '\\' + item + '\\__init__.py'):
                     _module_ = module.__name__ + '.' + item
-                    _modules_.append(importlib.import_module(_module_))
+                    try: 
+                        _modules_.append(importlib.import_module(_module_))
+                    except ModuleNotFoundError: 
+                        print('not found module : ' + _module_)
             elif item.endswith('.py') and item != "__init__.py":
                 _module_ = module.__name__ + '.' + item[0 : len(item) - 3]
-                _modules_.append(importlib.import_module(_module_))
+                try: 
+                    _modules_.append(importlib.import_module(_module_))
+                except ModuleNotFoundError:
+                    print('not found module : ' + _module_)
     if not module_spec.submodule_search_locations == None:
         for location in module_spec.submodule_search_locations:
             _list_modules_in_(location)
@@ -107,7 +118,7 @@ def _getsubmodules_(module):
 
 def _getdocstring_(obj):
     """
-    Helper function which retrieves the docstring of the passed module/class/function object.
+    Helper function which retrieves the $glossary{docstring} of the passed module/class/function object.
 
     This function is also responsible for the processing of the sheepy-markdown.
 
@@ -123,19 +134,32 @@ def _getdocstring_(obj):
     _doc_ = re.sub(r'\*([A-Za-z 0-9]+)\*', r'<b>\1</b>', _doc_)
     _doc_ = re.sub(r'\~([A-Za-z 0-9]+)\~', r'<i>\1</i>', _doc_)
     _doc_ = re.sub(r'\_([A-Za-z 0-9]+)\_', r'<u>\1</u>', _doc_)
-    _doc_ = re.sub(r'\[([A-Za-z 0-9]+)\]\{([a-zA-z0-9\_\&\#\$\.\,\-\=\+\'\"\[\]\{\}\(\)\\\/\@\!\~\`\:\;]+)\}', r'<a href="\2">\1</a>', _doc_)
+    _doc_ = re.sub(r'\[([A-Za-z 0-9]+)\]\{([a-zA-z0-9\_\&\#\$\.\,\-\=\+\'\"\[\]\{\}\(\)\\\/\@\!\~\`\:\;]+)\}', r'<a href="\2" target="_blank">\1</a>', _doc_)
+    _doc_ = re.sub(
+        r"""\$glossary\{[ ]*([A-Za-z0-9 \.\,]+)[ ]*\}""",
+        r"""<span style="display: inline-flex;" class="sheepy-glossary-link" md-colors="{color:'accent'}" ng-click="openGlossary('\1');">\1</span>""",
+        _doc_
+        )
+    _doc_ = re.sub(r"\$search\{([A-Za-z0-9 \.\,]+)\}", r"<a class='sheepy-link' target='_blank' href='https://www.google.co.in/search?q=\1'>\1</a>", _doc_)
+    _doc_ = re.sub(
+        r"""\$index\{[ ]*([A-Za-z0-9 \.\,]+)[ ]*\}""",
+        r"""<span style="display: inline-flex;" class="sheepy-glossary-link" md-colors="{color:'primary'}" ng-click="setIndex('\1');">\1</span>""",
+        _doc_
+        )
     return _doc_
 
 def _generatejson_class_(cls):
     """
-    Generates the JSON convertible Python object that represents the class.
+    Generates the $search{JSON} convertible Python object that represents the class.
 
     @param cls : class {
         The class object to convert to JSON equivalent.
         }
     """
     _class = {}
-    _class['code'] = _getsourcecode_(cls)
+    _class['code'] = '$sheepycode`' + _getsourcecode_(cls) + '`$sheepycode'
+    _class['methods'] = _generatedoc_methods_(cls)
+    _class['classes'] = _generatedoc_classes_(cls)
     print('class ' + cls.__name__)
     _docstring_ = _getdocstring_(cls)
     
@@ -145,12 +169,12 @@ def _generatejson_class_(cls):
 
 def _generatejson_method_(method):
     """
-    Generates the JSON convertible Python object that represents the function.
+    Generates the $search{JSON} convertible Python object that represents the function.
 
     The function-JSON contains the following information-
     <ul>
     <li><b>code</b><br />The code for the function.</li>
-    <li><b>description</b><br />The processed docstring for the method</li>
+    <li><b>description</b><br />The processed $glossary{docstring} for the method</li>
     <li><b>params</b><br />The parameters passed to the function.</li>
     <li><b>returns</b><br />The type of object(s) returned from the function</li>
     </ul>
@@ -160,8 +184,9 @@ def _generatejson_method_(method):
         }
     """
     _method = {}
-    _method['code'] = _getsourcecode_(method)
-    print('def ' + method.__name__)
+    _method['code'] = '$sheepycode`' + _getsourcecode_(method) + '`$sheepycode'
+    try: print('def ' + method.__name__)
+    except: pass
 
     _docstring_ = _getdocstring_(method)
     m_params = re.findall(__param_re__, _docstring_)
@@ -172,7 +197,7 @@ def _generatejson_method_(method):
     for m_return in m_returns:
         m_list.append(["returns", m_return])
 
-    _docstring_ = [("<p>" + line.strip() + "</p>") for line in _splitinclude_(_docstring_, m_list).splitlines() if len(line.strip()) != 0]
+    _docstring_ = [("<p>" + line.strip() + "</p>") for line in _splitinclude_(_docstring_, m_list).strip().splitlines() if len(line.strip()) != 0]
     _method['description'] = "".join(_docstring_)
 
     _method['params'] = {}
@@ -182,6 +207,14 @@ def _generatejson_method_(method):
             'type': param[1],
             'description': "".join([("<p>" + line.strip() + "</p>") for line in param[2].splitlines() if len(line.strip()) != 0])
             }
+
+    _method['returns'] = []
+    for ret in m_returns:
+        print("    returns " + ret[0])
+        _method['returns'].append({
+            'type': ret[0],
+            'description': "".join([("<p>" + line.strip() + "</p>") for line in ret[1].splitlines() if len(line.strip()) != 0])
+            })
     return _method
 
 __param_re__ = re.compile(r'@param[ ]+([A-Za-z0-9\_]+)[ ]+\:[ ]+([A-Za-z\_0-9\.\/]+)[\r\n ]+\{([A-Za-z \,\.\<\>\/\?\;\'\:\"\[\]\{\}\(\)\-\=\_\+\!\#\$\%\^\&\*\~\`0-9\t\r\n\"]+)\}')
@@ -191,7 +224,7 @@ __sub_re__ = re.compile(r'@sub[ ]+([A-Za-z 0-9\_\,\{\}\.\:\|\<\>\=\"\'\-\/\\]+)'
 
 def _generatedoc_modules_(module):
     """
-    Generates the JSON convertible Python object that represents the modules.
+    Generates the $search{JSON} convertible Python object that represents the modules.
     Basically returns an array of module-JSON converted.
 
     @param module : module {
@@ -211,31 +244,50 @@ def _generatedoc_modules_(module):
 
 def _generatedoc_methods_(mod_class):
     """
-    Generates the JSON convertible Python object that represents the methods for either a class or a module.
+    Generates the $search{JSON} convertible Python object that represents the methods for either a class or a module.
     Basically returns an array of methods-JSON converted.
 
     @param mod_class : module {
         The module or class needed to be processed
         }
     """
-    if inspect.ismodule(mod_class) or inspect.isclass(mod_class):
+    if inspect.ismodule(mod_class):
         _methods = {}
         for _method_ in inspect.getmembers(mod_class, inspect.isroutine):
+            if _settings_['ignore____methods']:
+                if _method_[0].startswith('__') and _method_[0].endswith('__'):
+                    continue
             if _method_[1].__module__ == mod_class.__name__:
                 _methods[_method_[0]] = _generatedoc_(_method_[1])
+        return _methods
+    if inspect.isclass(mod_class):
+        _methods = {}
+        for _method_ in inspect.getmembers(mod_class, inspect.isroutine):
+            if _settings_['ignore____methods']:
+                if _method_[0].startswith('__') and _method_[0].endswith('__'):
+                    continue
+            _methods[_method_[0]] = _generatedoc_(_method_[1])
+            if not 'name' in _methods[_method_[0]]:
+                _methods[_method_[0]]['name'] = _method_[0]
         return _methods
     return []
 
 def _generatedoc_classes_(mod_class):
     """
-    Generates the JSON convertible Python object that represents the classes.
+    Generates the $search{JSON} convertible Python object that represents the classes.
     Basically returns an array of class-JSON converted.
 
     @param mod_class : module {
         The module or class needed to be processed
         }
     """
-    if inspect.ismodule(mod_class) or inspect.isclass(mod_class):
+    if inspect.ismodule(mod_class):
+        _classes = {}
+        for _class_ in inspect.getmembers(mod_class, inspect.isclass):
+            if _class_[1].__module__ == mod_class.__name__:
+                _classes[_class_[0]] = _generatedoc_(_class_[1])
+        return _classes
+    if inspect.isclass(mod_class):
         _classes = {}
         for _class_ in inspect.getmembers(mod_class, inspect.isclass):
             if _class_[1].__module__ == mod_class.__name__:
@@ -245,7 +297,7 @@ def _generatedoc_classes_(mod_class):
 
 def _generatedoc_(source):
     """
-    This method processes the source (module/class/method) and returns the hirarchical JSOn format Python object.
+    This method processes the source (module/class/method) and returns the hirarchical $search{JSON} format Python object.
 
     @param source : module/class/method {
         The object to be processed
@@ -254,6 +306,8 @@ def _generatedoc_(source):
     if inspect.ismodule(source):
         _module = {}
         _docstring_ = _getdocstring_(source)
+        if len(re.compile(r'\@nodoc').findall(_docstring_)) != 0:
+            return {}
         try:
             name = __app_re__.findall(_docstring_)[0]
             start = _docstring_.index('@app')
@@ -271,7 +325,10 @@ def _generatedoc_(source):
         except:
             _module['sub'] = ""
         _module['description'] = "".join([("<p>" + line.strip() + "</p>") for line in _docstring_.splitlines() if len(line.strip()) != 0])
-        _module['code'] = "\n" + _getsourcecode_(source)
+        if len(_module['description']) == 0:
+            _module['description'] = "<i>No description available</i>"
+        
+        _module['code'] = '$sheepycode`' + _getsourcecode_(source) + '`$sheepycode'
         _module['modules'] = _generatedoc_modules_(source)
         _module['classes'] = _generatedoc_classes_(source)
         _module['methods'] = _generatedoc_methods_(source)
@@ -282,7 +339,11 @@ def _generatedoc_(source):
     elif inspect.isroutine(source):
         return _generatejson_method_(source)
 
-def generatedoc(source, output = 'docs', logo = 'images/logo.png'):
+_settings_ = {
+    'ignore____methods': False
+    }
+
+def generatedoc(source, output = 'docs', logo = 'images/logo.png', glossary = {}, ignore____methods = False):
     """
     This is the prime call method to invoke the documentation generation.
 
@@ -300,6 +361,7 @@ def generatedoc(source, output = 'docs', logo = 'images/logo.png'):
         Default value 'images/logo.png', the company/project logo file path
         }
     """
+    _settings_['ignore____methods'] = ignore____methods
     if os.path.exists(output + '\\' + source.__name__):
         _deleteall_(output)
 
@@ -320,7 +382,11 @@ def generatedoc(source, output = 'docs', logo = 'images/logo.png'):
     os.remove(output + '\\' + source.__name__ + '\\index.js')
     indexw = open(output + '\\' + source.__name__ + '\\index.js', "w")
     newSheepyJS = sheepyJS.replace('{$module}', source.__name__.replace('.', '_'))
-    newSheepyJS = newSheepyJS.replace('{$content}', dumps({ 'modules': packages, 'classes': {}, 'methods': {}, 'description': 'Documentation for ' + source.__name__, 'code': '' }))
+    
+    lines = dumps({ 'modules': packages, 'classes': {}, 'methods': {}, 'description': 'Documentation for ' + source.__name__, 'code': '' })
+    
+    newSheepyJS = newSheepyJS.replace('{$content}', lines.replace("\"$sheepycode`", "`").replace("`$sheepycode\"", "`"))
+    newSheepyJS = re.sub(r'\{\$glossary\}', dumps(glossary), newSheepyJS)
     indexw.write(newSheepyJS)
     indexw.close()
     
